@@ -1,0 +1,43 @@
+﻿@page "/counter"
+@inject IModalService Modal
+@inject IToastService toastService
+@using BlazorServerModal.Components
+
+<h1>Counter</h1>
+
+<p>Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">+</button>
+<button class="btn btn-primary" @onclick="DecrementCount">-</button>
+<button @onclick="ShowModalCounter" class="btn btn-primary">Change Counter</button>
+@code {
+
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+    private void DecrementCount()
+    {
+        currentCount--;
+    }
+    async Task ShowModalCounter()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(ModalCounter.currentCount), currentCount);
+
+        var formModal = Modal.Show<ModalCounter>("Change Counter", parameters);
+        var result = await formModal.Result;
+
+        if (!result.Cancelled)
+        {
+            currentCount = (int)result.Data;
+            toastService.ShowSuccess($"Το ποσό ενημερώθηκε και είναι {(int)result.Data}", "ΕΠΙΤΥΧΙΑ");
+        }
+        else
+        {
+            toastService.ShowInfo("Η εργασία ακυρώθηκε.", "ΕΝΗΜΕΡΩΣΗ");
+        }
+    }
+}
